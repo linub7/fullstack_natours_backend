@@ -12,7 +12,19 @@ exports.getAllTours = async (req, res) => {
 
 exports.createTour = async (req, res) => {
   const {
-    body: { name, price, rating },
+    body: {
+      name,
+      duration,
+      maxGroupSize,
+      difficulty,
+      ratingsAverage,
+      ratingsQuantity,
+      price,
+      summary,
+      description,
+      imageCover,
+      startDates,
+    },
   } = req;
 
   const existingTour = await Tour.findOne({ name });
@@ -23,7 +35,19 @@ exports.createTour = async (req, res) => {
     });
   }
 
-  const newTour = await Tour.create({ name, price, rating });
+  const newTour = await Tour.create({
+    name,
+    duration,
+    maxGroupSize,
+    difficulty,
+    ratingsAverage,
+    ratingsQuantity,
+    price,
+    summary,
+    description,
+    imageCover,
+    startDates,
+  });
 
   return res.status(201).json({
     status: 'success',
@@ -62,6 +86,7 @@ exports.updateTour = async (req, res) => {
     },
   });
 };
+
 exports.deleteTour = async (req, res) => {
   const {
     params: { tourId },
