@@ -1,18 +1,27 @@
 const express = require('express');
+const { isValidObjectId } = require('mongoose');
 const {
   getAllTours,
   createTour,
   getSingleTour,
   updateTour,
   deleteTour,
+  aliasTopTours,
 } = require('../controllers/tour');
 
 const router = express.Router();
 
 router.param('tourId', (req, res, next, val) => {
-  console.log(`Tour Id id: ${val}`);
+  if (!isValidObjectId(val)) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Please provide a valid tourId',
+    });
+  }
   next();
 });
+
+router.route('/tours/top-5-cheap').get(aliasTopTours, getAllTours);
 
 router.route('/tours').get(getAllTours).post(createTour);
 

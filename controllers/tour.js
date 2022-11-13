@@ -18,13 +18,50 @@ exports.getAllTours = async (req, res) => {
   if (query.sort) {
     const sortBy = query.sort.split(',').join(' ');
     queries = queries.sort(sortBy);
-  } else {
-    queries.sort('-createdAt');
   }
 
+  // 4)  Fields
+  if (query.fields) {
+    const selectedBy = query.fields.split(',').join(' ');
+    queries = queries.select(selectedBy);
+  } else {
+    queries = queries.select('-__v');
+  }
+
+  // 5) Pagination
+  // 1-10 : page1
+  // 11-20 : page2
+  // 21-30 : page3
+  // ...
+  const page = parseInt(query.page, 10) || 1;
+  const limit = parseInt(query.limit, 10) || 100;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  const total = await Tour.countDocuments();
+
+  queries = queries.skip(startIndex).limit(limit);
+
+  const pagination = {};
+
+  if (endIndex < total) {
+    pagination.next = {
+      page: page + 1,
+      limit,
+    };
+  }
+
+  if (startIndex > 0) {
+    pagination.prev = {
+      page: page - 1,
+      limit,
+    };
+  }
+
+  // Execute Query
   const tours = await queries;
   return res.json({
     status: 'success',
+    pagination,
     result: tours.length,
     data: {
       tours,
@@ -120,4 +157,11 @@ exports.deleteTour = async (req, res) => {
     status: 'success',
     message: 'deleted',
   });
+};
+
+exports.aliasTopTours = async (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
 };
