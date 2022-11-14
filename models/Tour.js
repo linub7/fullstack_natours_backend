@@ -51,6 +51,10 @@ const TourSchema = new Schema(
       type: String,
       required: [true, 'Please provide imageCover'],
     },
+    isSecret: {
+      type: Boolean,
+      default: false,
+    },
     images: [String],
     startDates: [Date],
   },
@@ -76,10 +80,30 @@ TourSchema.pre('save', function (next) {
 // in the case of post middleware has access not only to next,
 // but also to the document that was just saved to the DB
 // doc: just saved document
-// eslint-disable-next-line prefer-arrow-callback
 // TourSchema.post('save', function (doc, next) {
 //   console.log(doc);
 //   next();
 // });
+
+// QUERY MIDDLEWARE
+// in Query middleware -> this keyword point at the current query (NOT at the current document)
+// the use case that we're gonna do here is this:
+// let's suppose that we can have secret tours in our DB
+// like for tours that are only offered internally or very small like VIP group of people
+// and the public should't know about, and since these tours are secret
+// we do not want the secret tours to ever appear in the result outputs
+// TourSchema.pre('find', function (next) {
+// every query that starts with find
+TourSchema.pre(/^find/, function (next) {
+  this.find({ isSecret: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+TourSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds`);
+  console.log(docs);
+  next();
+});
 
 module.exports = mongoose.model('Tour', TourSchema);
