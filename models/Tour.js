@@ -102,7 +102,16 @@ TourSchema.pre(/^find/, function (next) {
 
 TourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`);
-  console.log(docs);
+  next();
+});
+
+// AGGREGATION MIDDLEWARE
+// this is gonna point to the current aggregation object
+TourSchema.pre('aggregate', function (next) {
+  // we remove isSecret: true tours in aggregation calculations
+  this.pipeline().unshift({
+    $match: { isSecret: { $ne: true } },
+  });
   next();
 });
 
