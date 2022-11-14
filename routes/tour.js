@@ -8,6 +8,7 @@ const {
   deleteTour,
   aliasTopTours,
   getTourStats,
+  getMonthlyPlan,
 } = require('../controllers/tour');
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.param('tourId', (req, res, next, val) => {
 });
 
 router.route('/tours/tour-stats').get(getTourStats);
+router.route('/tours/monthly-plan/:year').get(getMonthlyPlan);
 
 router.route('/tours/top-5-cheap').get(aliasTopTours, getAllTours);
 

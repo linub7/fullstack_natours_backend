@@ -154,6 +154,7 @@ exports.getTourStats = async (req, res) => {
 
   const stats = await Tour.aggregate([
     {
+      // $match: select document
       $match: {
         ratingsAverage: { $gte: 4.5 },
       },
@@ -185,6 +186,71 @@ exports.getTourStats = async (req, res) => {
     status: 'success',
     data: {
       stats,
+    },
+  });
+};
+
+exports.getMonthlyPlan = async (req, res) => {
+  const {
+    params: { year },
+  } = req;
+
+  const convertedDate = parseInt(year, 10);
+
+  const plan = await Tour.aggregate([
+    {
+      // $unwind: convert startDates array into objects -> every array elements -> 1 object
+      $unwind: '$startDates',
+    },
+    {
+      // select tours that starts 1st Jan ${convertedDate} and finished 31 Dec ${convertedDate}
+      $match: {
+        startDates: {
+          $gte: new Date(`${convertedDate}-01-01`),
+          $lte: new Date(`${convertedDate}-12-31`),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          // extract month from startDates
+          $month: '$startDates',
+        },
+        // add 1 per the tour starts on Special month
+        numTourStarts: { $sum: 1 },
+        // which tours starts on Special month -> per every tours push thats name! (name come from name field from Tour Model)
+        tours: { $push: '$name' },
+      },
+    },
+    {
+      // add month field per every _id -> _id represent month
+      $addFields: {
+        month: '$_id',
+      },
+    },
+    {
+      $project: {
+        // _id field will not show! -> with _id: 1 -> _id field will show
+        _id: 0,
+      },
+    },
+    {
+      $sort: {
+        // sort descending numTourStarts
+        numTourStarts: -1,
+      },
+    },
+    {
+      // show only 12 month
+      $limit: 12,
+    },
+  ]);
+
+  return res.json({
+    status: 'success',
+    data: {
+      plan,
     },
   });
 };
