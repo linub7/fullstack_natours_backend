@@ -52,7 +52,14 @@ const TourSchema = new Schema(
     images: [String],
     startDates: [Date],
   },
-  { timestamps: true }
+  // without toJSON: { virtuals: true }, toObject: { virtuals: true } our virtual field will now show
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+// arrow Fn does not get this keyword
+// keep in mind: we can not use virtuals in a query -> because virtuals is not part of the DB
+TourSchema.virtual('durationWeeks').get(function () {
+  return this.duration / 7;
+});
 
 module.exports = mongoose.model('Tour', TourSchema);
