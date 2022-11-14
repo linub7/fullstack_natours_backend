@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const { Schema } = mongoose;
 
@@ -10,6 +11,7 @@ const TourSchema = new Schema(
       unique: true,
       trim: true,
     },
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'Please provide duration'],
@@ -61,5 +63,23 @@ const TourSchema = new Schema(
 TourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
+
+// DOCUMENT MIDDLEWARE
+// runs ONLY before .save() and .create() -> will NOT run on .insertMany()
+// we also can use multiple TourSchema.pre('save', function() {...})
+// be careful to use next() when use chaining middleware
+TourSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+// in the case of post middleware has access not only to next,
+// but also to the document that was just saved to the DB
+// doc: just saved document
+// eslint-disable-next-line prefer-arrow-callback
+// TourSchema.post('save', function (doc, next) {
+//   console.log(doc);
+//   next();
+// });
 
 module.exports = mongoose.model('Tour', TourSchema);
