@@ -111,6 +111,84 @@ exports.deleteTour = async (req, res) => {
   });
 };
 
+exports.getTourStats = async (req, res) => {
+  // const stats = await Tour.aggregate([
+  //   {
+  //     $match: {
+  //       ratingsAverage: { $gte: 4.5 },
+  //     },
+  //   },
+  //   {
+  //     $group: {
+  //       _id: null,
+  //       // get number of tours -> add 1 (trickier)
+  //       numTours: { $sum: 1 },
+  //       numRatings: { $sum: '$ratingsQuantity' },
+  //       avgRating: { $avg: '$ratingsAverage' },
+  //       avgPrice: { $avg: '$price' },
+  //       minPrice: { $min: '$price' },
+  //       maxPrice: { $max: '$price' },
+  //     },
+  //   },
+  // ]);
+
+  // const stats = await Tour.aggregate([
+  //   {
+  //     $match: {
+  //       ratingsAverage: { $gte: 4.5 },
+  //     },
+  //   },
+  //   {
+  //     $group: {
+  //       _id: '$ratingsAverage',
+  //       // get number of tours -> add 1 (trickier)
+  //       numTours: { $sum: 1 },
+  //       numRatings: { $sum: '$ratingsQuantity' },
+  //       avgRating: { $avg: '$ratingsAverage' },
+  //       avgPrice: { $avg: '$price' },
+  //       minPrice: { $min: '$price' },
+  //       maxPrice: { $max: '$price' },
+  //     },
+  //   },
+  // ]);
+
+  const stats = await Tour.aggregate([
+    {
+      $match: {
+        ratingsAverage: { $gte: 4.5 },
+      },
+    },
+    {
+      $group: {
+        _id: { $toUpper: '$difficulty' },
+        // get number of tours -> add 1 (trickier)
+        numTours: { $sum: 1 },
+        numRatings: { $sum: '$ratingsQuantity' },
+        avgRating: { $avg: '$ratingsAverage' },
+        avgPrice: { $avg: '$price' },
+        minPrice: { $min: '$price' },
+        maxPrice: { $max: '$price' },
+      },
+    },
+    {
+      $sort: {
+        avgPrice: 1,
+      },
+    },
+    // repeat aggregation is possible -> but with new inputs that created in the prior stage
+    // {
+    //   $match: { _id: { $ne: 'EASY' } },
+    // },
+  ]);
+
+  return res.json({
+    status: 'success',
+    data: {
+      stats,
+    },
+  });
+};
+
 exports.aliasTopTours = async (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
