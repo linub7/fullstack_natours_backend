@@ -12,6 +12,7 @@ const TourSchema = new Schema(
       trim: true,
       maxlength: [40, 'A tour name must have less or equal 40 characters'],
       minlength: [10, 'A tour name must have more or equal 10 characters'],
+      // validate: [validator.isAlpha, 'Tour name must only contain characters'],
     },
     slug: String,
     duration: {
@@ -44,7 +45,16 @@ const TourSchema = new Schema(
       type: Number,
       required: [true, 'Please provide a price'],
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val) {
+          // this ONLY points to current doc on NEW document creation
+          return val < this.price;
+        },
+        message: (props) => `${props.value} should be lower than tour price`,
+      },
+    },
     summary: {
       type: String,
       trim: true,

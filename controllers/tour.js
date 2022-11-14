@@ -31,9 +31,12 @@ exports.createTour = async (req, res) => {
       ratingsAverage,
       ratingsQuantity,
       price,
+      priceDiscount,
       summary,
       description,
       imageCover,
+      isSecret,
+      images,
       startDates,
     },
   } = req;
@@ -54,9 +57,12 @@ exports.createTour = async (req, res) => {
     ratingsAverage,
     ratingsQuantity,
     price,
+    priceDiscount,
     summary,
     description,
     imageCover,
+    isSecret,
+    images,
     startDates,
   });
 
