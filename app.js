@@ -1,6 +1,8 @@
 const { readdirSync } = require('fs');
 const express = require('express');
 const morgan = require('morgan');
+const AppError = require('./utils/AppError');
+const globalErrorHandler = require('./controllers/error');
 
 const app = express();
 
@@ -13,10 +15,16 @@ readdirSync('./routes').map((route) =>
 );
 
 app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl}`,
-  });
+  // const err = new Error(`Can't find ${req.originalUrl}`);
+  // err.status = 'fail';
+  // err.statusCode = 404;
+
+  // if next receives an argument, no matter what it is, express will automatically know that
+  // there was an error and skip the other middlewares in the middleware stack and send
+  // the error that we passed in to our global error handling middleware
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
+
+app.use(globalErrorHandler);
 
 module.exports = app;
