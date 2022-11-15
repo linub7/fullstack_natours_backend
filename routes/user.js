@@ -1,4 +1,5 @@
 const express = require('express');
+const { signup, signin } = require('../controllers/auth');
 const {
   getAllUsers,
   createUser,
@@ -8,6 +9,9 @@ const {
 } = require('../controllers/user');
 
 const router = express.Router();
+
+router.post('/auth/signup', signup);
+router.post('/auth/signin', signin);
 
 router.route('/users').get(getAllUsers).post(createUser);
 
