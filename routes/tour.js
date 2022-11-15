@@ -10,15 +10,13 @@ const {
   getTourStats,
   getMonthlyPlan,
 } = require('../controllers/tour');
+const AppError = require('../utils/AppError');
 
 const router = express.Router();
 
 router.param('tourId', (req, res, next, val) => {
   if (!isValidObjectId(val)) {
-    return res.status(400).json({
-      status: 'fail',
-      message: 'Please provide a valid tourId',
-    });
+    return next(new AppError('Please provide a valid tourId', 400));
   }
   next();
 });

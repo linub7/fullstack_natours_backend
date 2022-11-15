@@ -18,10 +18,12 @@ const TourSchema = new Schema(
     duration: {
       type: Number,
       required: [true, 'Please provide duration'],
+      min: [1, 'Duration must be above 1.0'],
     },
     maxGroupSize: {
       type: Number,
       required: [true, 'Please provide Maximum Group Size'],
+      min: [1, 'Max Group Size must be above 1'],
     },
     difficulty: {
       type: String,

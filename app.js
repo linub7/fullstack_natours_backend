@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const AppError = require('./utils/AppError');
 const globalErrorHandler = require('./controllers/error');
+const errorHandler = require('./middleware/error');
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.use(express.json());
 readdirSync('./routes').map((route) =>
   app.use('/api/v1', require('./routes/' + route))
 );
+
+app.use(errorHandler);
 
 app.all('*', (req, res, next) => {
   // const err = new Error(`Can't find ${req.originalUrl}`);

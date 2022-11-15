@@ -1,7 +1,9 @@
 const Tour = require('../models/Tour');
 const ApiFeature = require('../utils/ApiFeature');
+const asyncHandler = require('../middleware/async');
+const AppError = require('../utils/AppError');
 
-exports.getAllTours = async (req, res) => {
+exports.getAllTours = asyncHandler(async (req, res, next) => {
   const { query } = req;
 
   // Execute Query
@@ -19,9 +21,9 @@ exports.getAllTours = async (req, res) => {
       tours,
     },
   });
-};
+});
 
-exports.createTour = async (req, res) => {
+exports.createTour = asyncHandler(async (req, res, next) => {
   const {
     body: {
       name,
@@ -43,10 +45,7 @@ exports.createTour = async (req, res) => {
 
   const existingTour = await Tour.findOne({ name });
   if (existingTour) {
-    return res.status(400).json({
-      status: 'fail',
-      message: 'Tour Already Exist',
-    });
+    return next(new AppError('Tour Already Exist', 400));
   }
 
   const newTour = await Tour.create({
@@ -72,21 +71,24 @@ exports.createTour = async (req, res) => {
       tour: newTour,
     },
   });
-};
+});
 
-exports.getSingleTour = async (req, res) => {
+exports.getSingleTour = asyncHandler(async (req, res, next) => {
   const {
     params: { tourId },
   } = req;
 
   const tour = await Tour.findById(tourId);
+  if (!tour) {
+    return next(new AppError(`Tour with ${tourId} was not found in db`, 404));
+  }
   return res.json({
     status: 'success',
     data: { tour },
   });
-};
+});
 
-exports.updateTour = async (req, res) => {
+exports.updateTour = asyncHandler(async (req, res, next) => {
   const {
     params: { tourId },
     body,
@@ -102,22 +104,26 @@ exports.updateTour = async (req, res) => {
       updatedTour,
     },
   });
-};
+});
 
-exports.deleteTour = async (req, res) => {
+exports.deleteTour = asyncHandler(async (req, res, next) => {
   const {
     params: { tourId },
   } = req;
 
-  await Tour.findByIdAndDelete(tourId);
+  const tour = await Tour.findByIdAndDelete(tourId);
+
+  if (!tour) {
+    return next(new AppError(`Tour with ${tourId} was not found in db`, 404));
+  }
 
   return res.json({
     status: 'success',
     message: 'deleted',
   });
-};
+});
 
-exports.getTourStats = async (req, res) => {
+exports.getTourStats = asyncHandler(async (req, res, next) => {
   // const stats = await Tour.aggregate([
   //   {
   //     $match: {
@@ -194,9 +200,9 @@ exports.getTourStats = async (req, res) => {
       stats,
     },
   });
-};
+});
 
-exports.getMonthlyPlan = async (req, res) => {
+exports.getMonthlyPlan = asyncHandler(async (req, res, next) => {
   const {
     params: { year },
   } = req;
@@ -259,11 +265,11 @@ exports.getMonthlyPlan = async (req, res) => {
       plan,
     },
   });
-};
+});
 
-exports.aliasTopTours = async (req, res, next) => {
+exports.aliasTopTours = asyncHandler(async (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
-};
+});
