@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
@@ -66,3 +67,27 @@ exports.signin = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  const {
+    body: { email },
+  } = req;
+  // 1) get user based on posted email
+  if (!email) return next(new AppError('Please provide an email', 400));
+  if (!validator.isEmail(email))
+    return next(new AppError('Please provide a valid email', 400));
+  const user = await User.findOne({ email });
+  if (!user) return next(new AppError('User not found', 404));
+
+  // 2) Generate the random reset token
+  const resetToken = user.createPasswordResetToken();
+  console.log({ resetToken });
+
+  await user.save({ validateBeforeSave: false });
+  // 3) send it to user's email
+  return res.json({
+    status: 'success',
+  });
+});
+
+exports.resetPassword = asyncHandler(async (req, res, next) => {});

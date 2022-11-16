@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const { Schema } = mongoose;
 
@@ -47,6 +48,8 @@ const UserSchema = new Schema(
       },
     },
     passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   // without toJSON: { virtuals: true }, toObject: { virtuals: true } our virtual field will now show
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
@@ -82,6 +85,20 @@ UserSchema.methods.changePasswordAfter = function (JWTTimestamp) {
   }
   // false means that NOT changed
   return false;
+};
+
+UserSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken);
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // expires in 10 minutes(converted to milliseconds)
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', UserSchema);
