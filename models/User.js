@@ -41,6 +41,7 @@ const UserSchema = new Schema(
         message: (props) => `${props.value} must be the same password`,
       },
     },
+    passwordChangedAt: Date,
   },
   // without toJSON: { virtuals: true }, toObject: { virtuals: true } our virtual field will now show
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
@@ -63,6 +64,19 @@ UserSchema.methods.correctPassword = async function (
   // we set select:false to password field -> so we can't use this.password and use its value
   // -> so we have to use an argument to represent storedPassword(userPassword)
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+UserSchema.methods.changePasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    // JWTTimestamp in seconds, this.passwordChangedAt.getTime() in milliseconds -> divided by 1000
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return JWTTimestamp < changedTimestamp; // 100 < 200 -> true -> password changed
+  }
+  // false means that NOT changed
+  return false;
 };
 
 module.exports = mongoose.model('User', UserSchema);

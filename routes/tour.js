@@ -10,6 +10,7 @@ const {
   getTourStats,
   getMonthlyPlan,
 } = require('../controllers/tour');
+const { protect } = require('../middleware/auth');
 const AppError = require('../utils/AppError');
 
 const router = express.Router();
@@ -26,7 +27,7 @@ router.route('/tours/monthly-plan/:year').get(getMonthlyPlan);
 
 router.route('/tours/top-5-cheap').get(aliasTopTours, getAllTours);
 
-router.route('/tours').get(getAllTours).post(createTour);
+router.route('/tours').get(protect, getAllTours).post(createTour);
 
 router
   .route('/tours/:tourId')

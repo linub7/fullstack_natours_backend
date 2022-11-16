@@ -26,6 +26,16 @@ const errorHandler = (err, req, res, next) => {
     error = new AppError(message.join('. '), 400);
   }
 
+  if (err.name === 'JsonWebTokenError') {
+    const message = 'Invalid token, please login again!';
+    error = new AppError(message, 401);
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    const message = 'Your Access token has expired, please login again';
+    error = new AppError(message, 401);
+  }
+
   res.status(error.statusCode || 500).json({
     status: 'fail',
     message: error.message || 'Server not Found',

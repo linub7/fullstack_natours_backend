@@ -10,10 +10,16 @@ const signToken = (id) =>
 
 exports.signup = asyncHandler(async (req, res, next) => {
   const {
-    body: { name, email, password, passwordConfirm },
+    body: { name, email, password, passwordConfirm, passwordChangedAt },
   } = req;
 
-  const newUser = await User.create({ name, email, password, passwordConfirm });
+  const newUser = await User.create({
+    name,
+    email,
+    password,
+    passwordConfirm,
+    passwordChangedAt,
+  });
 
   const token = signToken(newUser._id);
 
