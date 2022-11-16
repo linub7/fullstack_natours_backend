@@ -26,6 +26,7 @@ const UserSchema = new Schema(
       required: [true, 'Please provide a password'],
       min: [8, 'password must be at least 8 characters'],
       max: [25, 'password must be less that 26 characters'],
+      select: false,
     },
     passwordConfirm: {
       type: String,
@@ -54,5 +55,14 @@ UserSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+UserSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  // we set select:false to password field -> so we can't use this.password and use its value
+  // -> so we have to use an argument to represent storedPassword(userPassword)
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 module.exports = mongoose.model('User', UserSchema);
