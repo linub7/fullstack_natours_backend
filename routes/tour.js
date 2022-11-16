@@ -10,7 +10,7 @@ const {
   getTourStats,
   getMonthlyPlan,
 } = require('../controllers/tour');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const AppError = require('../utils/AppError');
 
 const router = express.Router();
@@ -33,6 +33,6 @@ router
   .route('/tours/:tourId')
   .get(getSingleTour)
   .patch(updateTour)
-  .delete(deleteTour);
+  .delete(protect, authorize('admin', 'lead-guide'), deleteTour);
 
 module.exports = router;

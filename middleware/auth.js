@@ -41,3 +41,17 @@ exports.protect = asyncHandler(async (req, res, next) => {
   req.user = freshUser;
   next();
 });
+
+exports.authorize =
+  (...roles) =>
+  (req, res, next) => {
+    const {
+      user: { role },
+    } = req;
+    // roles ['admin', 'lead-guide']. role='user'
+    if (!roles.includes(role))
+      return next(
+        new AppError(`You do not have permission to perform this action`, 403)
+      );
+    next();
+  };
