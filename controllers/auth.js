@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const asyncHandler = require('../middleware/async');
@@ -89,7 +90,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   const resetURL = `${req.protocol}://${req.get(
     'host'
   )}/api/v1/auth/reset-password/${resetToken}`;
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to \n ${resetURL}.\nIf you did'nt forget your password, please ignore this email`;
+  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to \n ${resetURL} \nIf you did'nt forget your password, please ignore this email`;
   const subject = 'Your Password Reset Token. Valid only for 10 minutes ⚠️.';
 
   try {
@@ -109,4 +110,39 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
-exports.resetPassword = asyncHandler(async (req, res, next) => {});
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const {
+    params: { token },
+    body: { password, passwordConfirm },
+  } = req;
+  if (!token || !password || !passwordConfirm)
+    return next(
+      new AppError('Please provide token, password and passwordConfirm', 400)
+    );
+
+  // 1) Get User based on the token
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  // 2) If token has not expired, and there is user, set the new password
+  if (!user)
+    return next(
+      new AppError('Token is invalid or has expired, please try again', 400)
+    );
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+  // 3) Update changedPasswordAt property for the user
+  // 4) Log the user in, send JWT
+  const generatedToken = signToken(user._id);
+  res.json({
+    status: 'success',
+    token: generatedToken,
+  });
+});
