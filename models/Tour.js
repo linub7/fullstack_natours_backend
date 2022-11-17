@@ -76,6 +76,30 @@ const TourSchema = new Schema(
     },
     images: [String],
     startDates: [Date],
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
   },
   // without toJSON: { virtuals: true }, toObject: { virtuals: true } our virtual field will now show
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }

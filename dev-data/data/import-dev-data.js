@@ -8,9 +8,7 @@ dotenv.config({
 });
 
 // Read JSON File
-const tours = JSON.parse(
-  readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
-);
+const tours = JSON.parse(readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 
 connectDB();
 
