@@ -11,6 +11,18 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+const createSendToken = (userId, user, statusCode, res) => {
+  const token = signToken(userId);
+
+  return res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
 exports.signup = asyncHandler(async (req, res, next) => {
   const {
     body: { name, email, password, passwordConfirm, passwordChangedAt },
@@ -24,16 +36,8 @@ exports.signup = asyncHandler(async (req, res, next) => {
     passwordChangedAt,
   });
 
-  const token = signToken(newUser._id);
-
   newUser.password = undefined;
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendToken(newUser._id, newUser, 201, res);
 });
 
 exports.signin = asyncHandler(async (req, res, next) => {
@@ -57,17 +61,9 @@ exports.signin = asyncHandler(async (req, res, next) => {
   if (!correct) return next(new AppError('Incorrect Credentials', 401));
 
   // 3) if everything is ok -> send token to client
-  const token = signToken(existUser._id);
 
   existUser.password = undefined;
-
-  return res.json({
-    status: 'success',
-    token,
-    data: {
-      user: existUser,
-    },
-  });
+  createSendToken(existUser._id, existUser, 200, res);
 });
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
@@ -145,4 +141,37 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     status: 'success',
     token: generatedToken,
   });
+});
+
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+  const {
+    body: { oldPassword, password, passwordConfirm },
+    user,
+  } = req;
+  if (!oldPassword || !password || !passwordConfirm)
+    return next(
+      new AppError(`Please provide an old password and new password`, 400)
+    );
+
+  // 1) Get user from DB
+  const existedUser = await User.findById(user.id).select('+password');
+  if (!existedUser) return next(new AppError('User not found', 404));
+
+  // 2) Check if the posted current password is correct
+  const isCorrect = await existedUser.correctPassword(
+    oldPassword,
+    existedUser.password
+  );
+  if (!isCorrect)
+    return next(new AppError(`Entered Password is not correct`, 401));
+
+  // 3) If, so, updated the password
+  existedUser.password = password;
+  existedUser.passwordConfirm = passwordConfirm;
+  // User.findByIdAndUpdate will NOT work as intended !
+  await existedUser.save();
+
+  // 4) Log user in, send JWT
+  existedUser.password = undefined;
+  createSendToken(existedUser._id, existedUser, 200, res);
 });
