@@ -12,6 +12,7 @@ const {
   getSingleUser,
   updateUser,
   deleteUser,
+  updateMe,
 } = require('../controllers/user');
 const { protect } = require('../middleware/auth');
 
@@ -25,6 +26,8 @@ router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
 
 router.route('/users').get(getAllUsers).post(createUser);
+
+router.patch('/me/update', protect, updateMe);
 
 router
   .route('/users/:userId')

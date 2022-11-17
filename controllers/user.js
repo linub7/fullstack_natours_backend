@@ -1,17 +1,70 @@
-exports.getAllUsers = (req, res) => {
+const asyncHandler = require('../middleware/async');
+const User = require('../models/User');
+const AppError = require('../utils/AppError');
+
+const filterObj = (obj, ...allowedFields) => {
+  const newObj = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el)) newObj[el] = obj[el];
+  });
+  return newObj;
+};
+
+exports.getAllUsers = asyncHandler(async (req, res, next) => {
   res.send('getAllUsers');
-};
+});
 
-exports.createUser = (req, res) => {
+exports.createUser = asyncHandler(async (req, res, next) => {
   res.send('createUser');
-};
+});
 
-exports.getSingleUser = (req, res) => {
+exports.getSingleUser = asyncHandler(async (req, res, next) => {
   res.send('getSingleUser');
-};
-exports.updateUser = (req, res) => {
+});
+
+exports.updateMe = asyncHandler(async (req, res, next) => {
+  const { body, user } = req;
+  // 1) Create Error if user posts password data
+  if (body.password || body.passwordConfirm)
+    return next(
+      new AppError(
+        `OOPS! you can not update password here! Please use /update-my-password`,
+        400
+      )
+    );
+
+  const isAlreadyEmailExited = await User.findOne({
+    email: body.email,
+    _id: { $ne: user._id },
+  });
+  if (isAlreadyEmailExited)
+    return next(
+      new AppError(
+        'This email has taken by another user, please take another email',
+        400
+      )
+    );
+  // 3) filtered out unwanted fields names that are not allowed to be updated
+  const filteredBody = filterObj(body, 'name', 'email');
+  // 2) Update user document
+  // since we don't deal with password or any sensitive data, so we can use findByIdAndUpdate
+  const updatedUser = await User.findByIdAndUpdate(user.id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.json({
+    status: 'success',
+    data: {
+      user: updatedUser,
+    },
+  });
+});
+
+exports.updateUser = asyncHandler(async (req, res, next) => {
   res.send('updateUser');
-};
-exports.deleteUser = (req, res) => {
+});
+
+exports.deleteUser = asyncHandler(async (req, res, next) => {
   res.send('deleteUser');
-};
+});
