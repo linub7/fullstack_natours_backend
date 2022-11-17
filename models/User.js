@@ -50,6 +50,11 @@ const UserSchema = new Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
   },
   // without toJSON: { virtuals: true }, toObject: { virtuals: true } our virtual field will now show
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
@@ -105,5 +110,11 @@ UserSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // expires in 10 minutes(converted to milliseconds)
   return resetToken;
 };
+
+UserSchema.pre(/^find/, function (next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 module.exports = mongoose.model('User', UserSchema);

@@ -11,7 +11,13 @@ const filterObj = (obj, ...allowedFields) => {
 };
 
 exports.getAllUsers = asyncHandler(async (req, res, next) => {
-  res.send('getAllUsers');
+  const users = await User.find({});
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      users,
+    },
+  });
 });
 
 exports.createUser = asyncHandler(async (req, res, next) => {
@@ -58,6 +64,19 @@ exports.updateMe = asyncHandler(async (req, res, next) => {
     data: {
       user: updatedUser,
     },
+  });
+});
+
+exports.deleteMe = asyncHandler(async (req, res, next) => {
+  const { user } = req;
+  await User.findByIdAndUpdate(
+    user.id,
+    { active: false },
+    { new: true, runValidators: true }
+  );
+  return res.status(204).json({
+    status: 'success',
+    data: null,
   });
 });
 
