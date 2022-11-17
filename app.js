@@ -2,24 +2,31 @@ const { readdirSync } = require('fs');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const AppError = require('./utils/AppError');
 const globalErrorHandler = require('./controllers/error');
 const errorHandler = require('./middleware/error');
 
 const app = express();
 
+// Set Security HTTP headers
+app.use(helmet());
+
+// Logging
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
+// Limit Request from same IP
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000, // 1h -> ms
   message: 'Too many request from this IP, please try again in an hour',
 });
-
 app.use('/api', limiter);
 
-app.use(express.json());
+// Body Parser, reading data from body into req.body
+app.use(express.json({ limit: '2mb' }));
 
+// Routes
 readdirSync('./routes').map((route) =>
   app.use('/api/v1', require('./routes/' + route))
 );
