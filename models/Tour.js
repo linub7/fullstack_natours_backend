@@ -161,6 +161,11 @@ TourSchema.pre(/^find/, function (next) {
   next();
 });
 
+TourSchema.pre(/^find/, function (next) {
+  this.populate('guides', 'name email role');
+  next();
+});
+
 TourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`);
   next();
