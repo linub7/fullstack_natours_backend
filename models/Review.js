@@ -31,7 +31,14 @@ const ReviewSchema = new Schema(
 );
 
 ReviewSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'tour', select: 'name' }).populate({
+  // in order to prevent populate chaining when we query single tour, we only populate user
+  // if we populate tour -> when we query single tour we populate reviews and then repopulate tour again!
+  // this.populate({ path: 'tour', select: 'name' }).populate({
+  //   path: 'user',
+  //   select: 'name',
+  // });
+
+  this.populate({
     path: 'user',
     select: 'name',
   });

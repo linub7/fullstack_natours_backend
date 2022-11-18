@@ -83,7 +83,7 @@ exports.getSingleTour = asyncHandler(async (req, res, next) => {
     params: { tourId },
   } = req;
 
-  const tour = await Tour.findById(tourId);
+  const tour = await Tour.findById(tourId).populate('reviews');
   if (!tour) {
     return next(new AppError(`Tour with ${tourId} was not found in db`, 404));
   }

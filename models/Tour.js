@@ -119,6 +119,19 @@ TourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// Virtual Populate: to prevent grow reviews of every tour -> we use virtual population
+// We have Review model that uses parent referencing with tour model
+// in order to see reviews of every tour we can use virtual populating ->
+TourSchema.virtual('reviews', {
+  // name of the model we wanna reference
+  ref: 'Review',
+  // foreignField: the name of the field in the other model
+  // -> Review model in this case so the foreignField is tour field -> Review: {review: String, ..., tour: {ref: 'Tour'}}
+  foreignField: 'tour',
+  // localField: in the Review model we implement _id of tour -> localField is _id
+  localField: '_id',
+});
+
 // DOCUMENT MIDDLEWARE
 // runs ONLY before .save() and .create() -> will NOT run on .insertMany()
 // we also can use multiple TourSchema.pre('save', function() {...})
@@ -162,7 +175,7 @@ TourSchema.pre(/^find/, function (next) {
 });
 
 TourSchema.pre(/^find/, function (next) {
-  this.populate('guides', 'name email role');
+  this.populate({ path: 'guides', select: 'name email role' });
   next();
 });
 
