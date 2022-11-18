@@ -40,8 +40,12 @@ exports.createTour = asyncHandler(async (req, res, next) => {
       isSecret,
       images,
       startDates,
+      guides,
     },
   } = req;
+
+  if (!guides || guides.length < 1)
+    return next(new AppError(`Please add guides`, 400));
 
   const existingTour = await Tour.findOne({ name });
   if (existingTour) {
@@ -63,6 +67,7 @@ exports.createTour = asyncHandler(async (req, res, next) => {
     isSecret,
     images,
     startDates,
+    guides,
   });
 
   return res.status(201).json({

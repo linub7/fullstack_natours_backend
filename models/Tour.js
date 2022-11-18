@@ -100,6 +100,14 @@ const TourSchema = new Schema(
         day: Number,
       },
     ],
+    // ----> if we use embedding for guides use this: <----
+    // guides: Array,
+    guides: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   // without toJSON: { virtuals: true }, toObject: { virtuals: true } our virtual field will now show
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
@@ -119,6 +127,16 @@ TourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+// ----> if we use embedding for guides use this: <----
+// TourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(
+//     async (guide) => await User.findById(guide)
+//   );
+//   // the result of this.guides.map(...) is a promise, so we have to use Promise.all
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 // in the case of post middleware has access not only to next,
 // but also to the document that was just saved to the DB
