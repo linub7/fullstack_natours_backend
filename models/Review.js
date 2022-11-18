@@ -11,7 +11,7 @@ const ReviewSchema = new Schema(
     },
     rating: {
       type: Number,
-      required: true,
+      required: [true, 'Please add a rating'],
       min: [1, 'Rating must be at least 1 or greater than 1'],
       max: [5, 'Rating can be 5 or less than 5'],
     },
@@ -29,5 +29,13 @@ const ReviewSchema = new Schema(
   // without toJSON: { virtuals: true }, toObject: { virtuals: true } our virtual field will now show
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+ReviewSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'tour', select: 'name' }).populate({
+    path: 'user',
+    select: 'name',
+  });
+  next();
+});
 
 module.exports = mongoose.model('Review', ReviewSchema);
