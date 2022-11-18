@@ -4,11 +4,16 @@ const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 
 exports.getAllReviews = asyncHandler(async (req, res, next) => {
-  const reviews = await Review.find({});
-  const reviewsCount = await Review.countDocuments();
+  const {
+    params: { tourId },
+  } = req;
+  let filter = {};
+  if (tourId) filter = { tour: tourId };
+  const reviews = await Review.find(filter);
+
   return res.status(200).json({
     status: 'success',
-    results: reviewsCount,
+    results: reviews.length,
     data: {
       reviews,
     },
@@ -17,18 +22,24 @@ exports.getAllReviews = asyncHandler(async (req, res, next) => {
 
 exports.createReview = asyncHandler(async (req, res, next) => {
   const {
-    body: { tour, review, rating },
+    params: { tourId },
+    body: { review, rating },
     user: { id },
   } = req;
 
-  if (!isValidObjectId(tour))
+  if (!isValidObjectId(tourId))
     return next(new AppError(`Please enter a valid tour`, 400));
 
-  const existedReview = await Review.findOne({ tour, user: id });
+  const existedReview = await Review.findOne({ tour: tourId, user: id });
   if (existedReview)
     return next(new AppError(`You already write a review for this tour`, 400));
 
-  const newReview = await Review.create({ review, rating, tour, user: id });
+  const newReview = await Review.create({
+    review,
+    rating,
+    tour: tourId,
+    user: id,
+  });
 
   return res.status(201).json({
     status: 'success',

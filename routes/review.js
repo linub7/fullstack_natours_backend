@@ -5,7 +5,7 @@ const { getAllReviews, createReview } = require('../controllers/review');
 const { protect, authorize } = require('../middleware/auth');
 const AppError = require('../utils/AppError');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.param('reviewId', (req, res, next, val) => {
   if (!isValidObjectId(val)) {
@@ -18,11 +18,5 @@ router
   .route('/reviews')
   .get(protect, authorize('admin'), getAllReviews)
   .post(protect, authorize('user'), createReview);
-
-// router
-//   .route('/reviews/:reviewId')
-//   .get(getSingleTour)
-//   .patch(updateTour)
-//   .delete(protect, authorize('admin', 'lead-guide'), deleteTour);
 
 module.exports = router;

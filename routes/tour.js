@@ -1,5 +1,7 @@
 const express = require('express');
 const { isValidObjectId } = require('mongoose');
+const reviewRoutes = require('./review');
+
 const {
   getAllTours,
   createTour,
@@ -21,6 +23,9 @@ router.param('tourId', (req, res, next, val) => {
   }
   next();
 });
+
+// nested routes  with reviews
+router.use('/tours/:tourId', reviewRoutes);
 
 router.route('/tours/tour-stats').get(getTourStats);
 router.route('/tours/monthly-plan/:year').get(getMonthlyPlan);
