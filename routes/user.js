@@ -14,6 +14,7 @@ const {
   deleteUser,
   updateMe,
   deleteMe,
+  getMe,
 } = require('../controllers/user');
 const { protect } = require('../middleware/auth');
 const AppError = require('../utils/AppError');
@@ -36,6 +37,7 @@ router.post('/auth/signin', signin);
 
 router.route('/users').get(getAllUsers);
 
+router.get('/me', protect, getMe);
 router.patch('/me/update', protect, updateMe);
 router.delete('/me/delete', protect, deleteMe);
 

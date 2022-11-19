@@ -65,6 +65,20 @@ exports.deleteMe = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const {
+    user: { id },
+  } = req;
+  const user = await User.findById(id);
+  if (!user) return next(new AppError(`User not found`, 404));
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      data: user,
+    },
+  });
+});
+
 exports.getSingleUser = factory.getSingleOne(User);
 
 exports.updateUser = factory.updateOne(User);
