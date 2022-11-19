@@ -2,6 +2,7 @@ const { isValidObjectId } = require('mongoose');
 const Review = require('../models/Review');
 const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
+const factory = require('./handlerFactory');
 
 exports.getAllReviews = asyncHandler(async (req, res, next) => {
   const {
@@ -48,3 +49,5 @@ exports.createReview = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.deleteReview = factory.deleteOne(Review);

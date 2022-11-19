@@ -2,6 +2,7 @@ const Tour = require('../models/Tour');
 const ApiFeature = require('../utils/ApiFeature');
 const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
+const factory = require('./handlerFactory');
 
 exports.getAllTours = asyncHandler(async (req, res, next) => {
   const { query } = req;
@@ -80,12 +81,12 @@ exports.createTour = asyncHandler(async (req, res, next) => {
 
 exports.getSingleTour = asyncHandler(async (req, res, next) => {
   const {
-    params: { tourId },
+    params: { id },
   } = req;
 
-  const tour = await Tour.findById(tourId).populate('reviews');
+  const tour = await Tour.findById(id).populate('reviews');
   if (!tour) {
-    return next(new AppError(`Tour with ${tourId} was not found in db`, 404));
+    return next(new AppError(`Tour with ${id} was not found in db`, 404));
   }
   return res.json({
     status: 'success',
@@ -95,10 +96,10 @@ exports.getSingleTour = asyncHandler(async (req, res, next) => {
 
 exports.updateTour = asyncHandler(async (req, res, next) => {
   const {
-    params: { tourId },
+    params: { id },
     body,
   } = req;
-  const updatedTour = await Tour.findByIdAndUpdate(tourId, body, {
+  const updatedTour = await Tour.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true,
   });
@@ -111,22 +112,24 @@ exports.updateTour = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.deleteTour = asyncHandler(async (req, res, next) => {
-  const {
-    params: { tourId },
-  } = req;
+exports.deleteTour = factory.deleteOne(Tour);
 
-  const tour = await Tour.findByIdAndDelete(tourId);
+// exports.deleteTour = asyncHandler(async (req, res, next) => {
+//   const {
+//     params: { tourId },
+//   } = req;
 
-  if (!tour) {
-    return next(new AppError(`Tour with ${tourId} was not found in db`, 404));
-  }
+//   const tour = await Tour.findByIdAndDelete(tourId);
 
-  return res.json({
-    status: 'success',
-    message: 'deleted',
-  });
-});
+//   if (!tour) {
+//     return next(new AppError(`Tour with ${tourId} was not found in db`, 404));
+//   }
+
+//   return res.json({
+//     status: 'success',
+//     message: 'deleted',
+//   });
+// });
 
 exports.getTourStats = asyncHandler(async (req, res, next) => {
   // const stats = await Tour.aggregate([

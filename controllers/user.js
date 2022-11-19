@@ -1,6 +1,7 @@
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
+const factory = require('./handlerFactory');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -84,6 +85,8 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   res.send('updateUser');
 });
 
-exports.deleteUser = asyncHandler(async (req, res, next) => {
-  res.send('deleteUser');
-});
+exports.deleteUser = factory.deleteOne(User);
+
+// exports.deleteUser = asyncHandler(async (req, res, next) => {
+//   res.send('deleteUser');
+// });

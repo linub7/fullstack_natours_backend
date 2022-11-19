@@ -21,9 +21,9 @@ const AppError = require('../utils/AppError');
 
 const router = express.Router();
 
-router.param('userId', (req, res, next, val) => {
+router.param('id', (req, res, next, val) => {
   if (!isValidObjectId(val)) {
-    return next(new AppError('Please provide a valid userId', 400));
+    return next(new AppError('Please provide a valid id', 400));
   }
   next();
 });
@@ -41,7 +41,7 @@ router.patch('/me/update', protect, updateMe);
 router.delete('/me/delete', protect, deleteMe);
 
 router
-  .route('/users/:userId')
+  .route('/users/:id')
   .get(getSingleUser)
   .patch(updateUser)
   .delete(deleteUser);
