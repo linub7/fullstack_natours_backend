@@ -4,6 +4,7 @@ const {
   getAllReviews,
   createReview,
   deleteReview,
+  updateReview,
 } = require('../controllers/review');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -23,6 +24,9 @@ router
   .get(protect, authorize('admin'), getAllReviews)
   .post(protect, authorize('user'), createReview);
 
-router.route('/reviews/:id').delete(protect, deleteReview);
+router
+  .route('/reviews/:id')
+  .patch(protect, updateReview)
+  .delete(protect, deleteReview);
 
 module.exports = router;

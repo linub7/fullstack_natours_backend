@@ -17,3 +17,24 @@ exports.deleteOne = (Model) =>
       message: 'deleted',
     });
   });
+
+exports.updateOne = (Model) =>
+  asyncHandler(async (req, res, next) => {
+    const {
+      params: { id },
+      body,
+    } = req;
+    const updatedDoc = await Model.findByIdAndUpdate(id, body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updatedDoc) {
+      return next(new AppError(`Document with ${id} was not found in db`, 404));
+    }
+    return res.json({
+      status: 'success',
+      data: {
+        data: updatedDoc,
+      },
+    });
+  });

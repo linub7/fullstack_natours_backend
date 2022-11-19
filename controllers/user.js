@@ -81,12 +81,10 @@ exports.deleteMe = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.updateUser = asyncHandler(async (req, res, next) => {
-  res.send('updateUser');
-});
+// exports.updateUser = asyncHandler(async (req, res, next) => {
+//   res.send('updateUser');
+// });
+
+exports.updateUser = factory.updateOne(User);
 
 exports.deleteUser = factory.deleteOne(User);
-
-// exports.deleteUser = asyncHandler(async (req, res, next) => {
-//   res.send('deleteUser');
-// });

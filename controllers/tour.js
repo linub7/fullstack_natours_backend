@@ -94,42 +94,9 @@ exports.getSingleTour = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.updateTour = asyncHandler(async (req, res, next) => {
-  const {
-    params: { id },
-    body,
-  } = req;
-  const updatedTour = await Tour.findByIdAndUpdate(id, body, {
-    new: true,
-    runValidators: true,
-  });
-
-  return res.json({
-    status: 'success',
-    data: {
-      updatedTour,
-    },
-  });
-});
+exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
-
-// exports.deleteTour = asyncHandler(async (req, res, next) => {
-//   const {
-//     params: { tourId },
-//   } = req;
-
-//   const tour = await Tour.findByIdAndDelete(tourId);
-
-//   if (!tour) {
-//     return next(new AppError(`Tour with ${tourId} was not found in db`, 404));
-//   }
-
-//   return res.json({
-//     status: 'success',
-//     message: 'deleted',
-//   });
-// });
 
 exports.getTourStats = asyncHandler(async (req, res, next) => {
   // const stats = await Tour.aggregate([
