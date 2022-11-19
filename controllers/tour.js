@@ -1,28 +1,7 @@
 const Tour = require('../models/Tour');
-const ApiFeature = require('../utils/ApiFeature');
 const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 const factory = require('./handlerFactory');
-
-exports.getAllTours = asyncHandler(async (req, res, next) => {
-  const { query } = req;
-
-  // Execute Query
-  const features = new ApiFeature(Tour.find(), query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-
-  const tours = await features.query;
-  return res.json({
-    status: 'success',
-    result: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
 
 exports.createTour = asyncHandler(async (req, res, next) => {
   const {
@@ -79,20 +58,9 @@ exports.createTour = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getSingleTour = asyncHandler(async (req, res, next) => {
-  const {
-    params: { id },
-  } = req;
+exports.getAllTours = factory.getAll(Tour);
 
-  const tour = await Tour.findById(id).populate('reviews');
-  if (!tour) {
-    return next(new AppError(`Tour with ${id} was not found in db`, 404));
-  }
-  return res.json({
-    status: 'success',
-    data: { tour },
-  });
-});
+exports.getSingleTour = factory.getSingleOne(Tour, { path: 'reviews' });
 
 exports.updateTour = factory.updateOne(Tour);
 

@@ -11,23 +11,7 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = asyncHandler(async (req, res, next) => {
-  const users = await User.find({});
-  return res.status(200).json({
-    status: 'success',
-    data: {
-      users,
-    },
-  });
-});
-
-exports.createUser = asyncHandler(async (req, res, next) => {
-  res.send('createUser');
-});
-
-exports.getSingleUser = asyncHandler(async (req, res, next) => {
-  res.send('getSingleUser');
-});
+exports.getAllUsers = factory.getAll(User);
 
 exports.updateMe = asyncHandler(async (req, res, next) => {
   const { body, user } = req;
@@ -81,9 +65,7 @@ exports.deleteMe = asyncHandler(async (req, res, next) => {
   });
 });
 
-// exports.updateUser = asyncHandler(async (req, res, next) => {
-//   res.send('updateUser');
-// });
+exports.getSingleUser = factory.getSingleOne(User);
 
 exports.updateUser = factory.updateOne(User);
 

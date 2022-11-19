@@ -9,7 +9,6 @@ const {
 } = require('../controllers/auth');
 const {
   getAllUsers,
-  createUser,
   getSingleUser,
   updateUser,
   deleteUser,
@@ -35,7 +34,7 @@ router.patch('/auth/update-my-password', protect, updatePassword);
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
 
-router.route('/users').get(getAllUsers).post(createUser);
+router.route('/users').get(getAllUsers);
 
 router.patch('/me/update', protect, updateMe);
 router.delete('/me/delete', protect, deleteMe);

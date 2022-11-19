@@ -4,23 +4,6 @@ const asyncHandler = require('../middleware/async');
 const AppError = require('../utils/AppError');
 const factory = require('./handlerFactory');
 
-exports.getAllReviews = asyncHandler(async (req, res, next) => {
-  const {
-    params: { tourId },
-  } = req;
-  let filter = {};
-  if (tourId) filter = { tour: tourId };
-  const reviews = await Review.find(filter);
-
-  return res.status(200).json({
-    status: 'success',
-    results: reviews.length,
-    data: {
-      reviews,
-    },
-  });
-});
-
 exports.createReview = asyncHandler(async (req, res, next) => {
   const {
     params: { tourId },
@@ -49,6 +32,10 @@ exports.createReview = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.getAllReviews = factory.getAll(Review);
+
+exports.getSingleReview = factory.getSingleOne(Review);
 
 exports.updateReview = factory.updateOne(Review);
 
