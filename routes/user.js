@@ -7,6 +7,7 @@ const {
   resetPassword,
   updatePassword,
 } = require('../controllers/auth');
+const factory = require('../controllers/handlerFactory');
 const {
   getAllUsers,
   getSingleUser,
@@ -14,9 +15,9 @@ const {
   deleteUser,
   updateMe,
   deleteMe,
-  getMe,
 } = require('../controllers/user');
-const { protect } = require('../middleware/auth');
+const { protect, getMe } = require('../middleware/auth');
+const User = require('../models/User');
 const AppError = require('../utils/AppError');
 
 const router = express.Router();
@@ -37,7 +38,7 @@ router.post('/auth/signin', signin);
 
 router.route('/users').get(getAllUsers);
 
-router.get('/me', protect, getMe);
+router.get('/me', protect, getMe, factory.getSingleOne(User));
 router.patch('/me/update', protect, updateMe);
 router.delete('/me/delete', protect, deleteMe);
 
