@@ -77,7 +77,7 @@ exports.getToursWithin = asyncHandler(async (req, res, next) => {
       )
     );
   if (unit !== 'km' && unit !== 'mi')
-    return next(new AppError(`Please provide correct unit -> km or ml`, 400));
+    return next(new AppError(`Please provide correct unit -> km or mi`, 400));
 
   // radius is basically the distance that we want to have as the radius but converted
   // to a special unit called radians, in order to get radians, we need to divide our distance
@@ -95,6 +95,59 @@ exports.getToursWithin = asyncHandler(async (req, res, next) => {
     results: tours.length,
     data: {
       data: tours,
+    },
+  });
+});
+
+exports.getDistances = asyncHandler(async (req, res, next) => {
+  const {
+    params: { latlng, unit },
+  } = req;
+
+  const [lat, lng] = latlng.split(',');
+
+  if (!lat || !lng)
+    return next(
+      new AppError(
+        `Please provide latitude and longitude in the format like this lat,lng`,
+        400
+      )
+    );
+  if (unit !== 'km' && unit !== 'mi')
+    return next(new AppError(`Please provide correct unit -> km or mi`, 400));
+
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+  // for geoSpatial aggregation, there's actually one single stage that's called geoNear
+  // $geoNear is required at least one of our fields contains a geoSpatial index -> we already
+  // did that before(../models/Tour.js -> line 121)
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [lng * 1, lat * 1], // * 1 -> converted to number
+        },
+        // distanceField: this is the name of the field that will be created and where all the
+        // calculated distances will be stored
+        distanceField: 'distance',
+        // results in meter -> multiply to .001 to get Km
+        distanceMultiplier: multiplier,
+      },
+    },
+    {
+      // select only distance and name of the tour
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances,
     },
   });
 });

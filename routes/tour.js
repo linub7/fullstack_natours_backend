@@ -12,11 +12,18 @@ const {
   getTourStats,
   getMonthlyPlan,
   getToursWithin,
+  getDistances,
 } = require('../controllers/tour');
 const { protect, authorize } = require('../middleware/auth');
 const AppError = require('../utils/AppError');
 
 const router = express.Router();
+
+router
+  .route('/tours/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(getToursWithin);
+
+router.route('/tours/tours-distances/:latlng/unit/:unit').get(getDistances);
 
 router.param('id', (req, res, next, val) => {
   if (!isValidObjectId(val)) {
@@ -34,10 +41,6 @@ router
   .get(protect, authorize('admin', 'lead-guide', 'guide'), getMonthlyPlan);
 
 router.route('/tours/top-5-cheap').get(aliasTopTours, getAllTours);
-
-router
-  .route('/tours/tours-within/:distance/center/:latlng/unit/:unit')
-  .get(getToursWithin);
 
 router
   .route('/tours')

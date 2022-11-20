@@ -193,12 +193,14 @@ TourSchema.post(/^find/, function (docs, next) {
 
 // AGGREGATION MIDDLEWARE
 // this is gonna point to the current aggregation object
-TourSchema.pre('aggregate', function (next) {
-  // we remove isSecret: true tours in aggregation calculations
-  this.pipeline().unshift({
-    $match: { isSecret: { $ne: true } },
-  });
-  next();
-});
+// in order to calculate geoSpatial aggregation -> we have to use $geoNear -> $geoNear must be in the
+// first stage -> we have to commented this aggregate
+// TourSchema.pre('aggregate', function (next) {
+//   // we remove isSecret: true tours in aggregation calculations
+//   this.pipeline().unshift({
+//     $match: { isSecret: { $ne: true } },
+//   });
+//   next();
+// });
 
 module.exports = mongoose.model('Tour', TourSchema);
