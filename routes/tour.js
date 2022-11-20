@@ -11,6 +11,7 @@ const {
   aliasTopTours,
   getTourStats,
   getMonthlyPlan,
+  getToursWithin,
 } = require('../controllers/tour');
 const { protect, authorize } = require('../middleware/auth');
 const AppError = require('../utils/AppError');
@@ -33,6 +34,10 @@ router
   .get(protect, authorize('admin', 'lead-guide', 'guide'), getMonthlyPlan);
 
 router.route('/tours/top-5-cheap').get(aliasTopTours, getAllTours);
+
+router
+  .route('/tours/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(getToursWithin);
 
 router
   .route('/tours')

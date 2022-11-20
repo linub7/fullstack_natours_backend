@@ -116,6 +116,9 @@ const TourSchema = new Schema(
 
 TourSchema.index({ price: 1, ratingsAverage: -1 });
 TourSchema.index({ slug: 1 });
+// in order to be able to do just basic queries to geospacial, we need to first attribute an index
+// to the field where the geospatial data that we're searching for is stored
+TourSchema.index({ startLocation: '2dsphere' });
 
 // arrow Fn does not get this keyword
 // keep in mind: we can not use virtuals in a query -> because virtuals is not part of the DB

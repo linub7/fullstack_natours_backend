@@ -62,6 +62,43 @@ exports.getAllTours = factory.getAll(Tour);
 
 exports.getSingleTour = factory.getSingleOne(Tour, { path: 'reviews' });
 
+exports.getToursWithin = asyncHandler(async (req, res, next) => {
+  const {
+    params: { distance, latlng, unit },
+  } = req;
+
+  const [lat, lng] = latlng.split(',');
+
+  if (!lat || !lng)
+    return next(
+      new AppError(
+        `Please provide latitude and longitude in the format like this lat,lng`,
+        400
+      )
+    );
+  if (unit !== 'km' && unit !== 'mi')
+    return next(new AppError(`Please provide correct unit -> km or ml`, 400));
+
+  // radius is basically the distance that we want to have as the radius but converted
+  // to a special unit called radians, in order to get radians, we need to divide our distance
+  // by the radius of the earth
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  // $geoWithin: finds the documents within a certain geometry
+  // $centerSphere: takes an array of the coordinates and of the radius -> lng is the first element
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  return res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours,
+    },
+  });
+});
+
 exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
