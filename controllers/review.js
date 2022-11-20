@@ -6,22 +6,22 @@ const factory = require('./handlerFactory');
 
 exports.createReview = asyncHandler(async (req, res, next) => {
   const {
-    params: { tourId },
+    params,
     body: { review, rating },
     user: { id },
   } = req;
 
-  if (!isValidObjectId(tourId))
+  if (!isValidObjectId(params.id))
     return next(new AppError(`Please enter a valid tour`, 400));
 
-  const existedReview = await Review.findOne({ tour: tourId, user: id });
+  const existedReview = await Review.findOne({ tour: params.id, user: id });
   if (existedReview)
     return next(new AppError(`You already write a review for this tour`, 400));
 
   const newReview = await Review.create({
     review,
     rating,
-    tour: tourId,
+    tour: params.id,
     user: id,
   });
 
