@@ -38,6 +38,7 @@ const TourSchema = new Schema(
       default: 4.5,
       min: [1, 'Rating must be above 1.0'],
       max: [5, 'Rating must be below 5.0'],
+      set: (val) => Math.round(val * 10) / 10, // Math.round(val) -> returns an integer, we multiply 10 and then divided by 10 to returns float -> 4.66 gives us 4.7 NOT 5
     },
     ratingsQuantity: {
       type: Number,

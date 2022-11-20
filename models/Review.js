@@ -31,6 +31,8 @@ const ReviewSchema = new Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+ReviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 ReviewSchema.pre(/^find/, function (next) {
   // in order to prevent populate chaining when we query single tour, we only populate user
   // if we populate tour -> when we query single tour we populate reviews and then repopulate tour again!
