@@ -66,14 +66,27 @@ ReviewSchema.statics.calcAverageRatings = async function (tourId) {
     },
   ]);
 
-  await Tour.findByIdAndUpdate(
-    tourId,
-    {
-      ratingsAverage: stats[0].avgRating,
-      ratingsQuantity: stats[0].nRatings,
-    },
-    { new: true }
-  );
+  console.log(stats);
+
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(
+      tourId,
+      {
+        ratingsAverage: stats[0].avgRating,
+        ratingsQuantity: stats[0].nRatings,
+      },
+      { new: true }
+    );
+  } else {
+    await Tour.findByIdAndUpdate(
+      tourId,
+      {
+        ratingsAverage: 4.5,
+        ratingsQuantity: 0,
+      },
+      { new: true }
+    );
+  }
 };
 
 ReviewSchema.post('save', function () {
@@ -81,6 +94,25 @@ ReviewSchema.post('save', function () {
   // this points to current review
   // in order to reach Review model we need to use this.constructor.
   this.constructor.calcAverageRatings(this.tour);
+});
+
+// we want to calculate average ratings and quantity for when a review is updated or deleted
+// we need to use findByIdAnUpdate or findByIdAndDelete -> for these we can not access to
+// document middleware but only query middleware, in the query middleware we actually don't have direct
+// access to the document so we can not use this.constructor.calcAverageRatings(this.tour); 😖
+// in this case, we're gonna implement a pre-middleware for these hooks(this events basically)
+ReviewSchema.pre(/^findOneAnd/, async function (next) {
+  // this -> point to current query
+  // .clone() -> to prevent get error(MongooseError: Query was already executed: Review.findOne(...))
+  // we will find the exact review with this -> (go to line 101)
+  this.r = await this.findOne().clone();
+  next();
+});
+
+ReviewSchema.post(/^findOneAnd/, async function () {
+  // await this.findOne().clone(); does NOT work here, query has already executed
+  // -> (from line 94) and get that review to use here
+  await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 module.exports = mongoose.model('Review', ReviewSchema);

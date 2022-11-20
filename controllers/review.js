@@ -70,7 +70,7 @@ exports.deleteReview = asyncHandler(async (req, res, next) => {
   if (existedReview.user._id.toString() !== user.id.toString())
     return next(new AppError(`You can only delete your own reviews`, 401));
 
-  await existedReview.remove();
+  await Review.findByIdAndDelete(id);
 
   return res.status(200).json({
     status: 'success',
