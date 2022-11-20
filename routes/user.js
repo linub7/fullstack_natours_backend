@@ -16,7 +16,7 @@ const {
   updateMe,
   deleteMe,
 } = require('../controllers/user');
-const { protect, getMe } = require('../middleware/auth');
+const { protect, getMe, authorize } = require('../middleware/auth');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
 
@@ -36,7 +36,7 @@ router.patch('/auth/update-my-password', protect, updatePassword);
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
 
-router.route('/users').get(getAllUsers);
+router.route('/users').get(protect, authorize('admin'), getAllUsers);
 
 router.get('/me', protect, getMe, factory.getSingleOne(User));
 router.patch('/me/update', protect, updateMe);
@@ -44,8 +44,8 @@ router.delete('/me/delete', protect, deleteMe);
 
 router
   .route('/users/:id')
-  .get(getSingleUser)
-  .patch(updateUser)
-  .delete(deleteUser);
+  .get(protect, authorize('admin'), getSingleUser)
+  .patch(protect, authorize('admin'), updateUser)
+  .delete(protect, authorize('admin'), deleteUser);
 
 module.exports = router;

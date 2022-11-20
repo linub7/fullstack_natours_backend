@@ -37,6 +37,43 @@ exports.getAllReviews = factory.getAll(Review);
 
 exports.getSingleReview = factory.getSingleOne(Review);
 
-exports.updateReview = factory.updateOne(Review);
+exports.updateReview = asyncHandler(async (req, res, next) => {
+  const {
+    params: { id },
+    body: { review, rating },
+    user,
+  } = req;
+  const existedReview = await Review.findById(id).populate('user');
+  if (!existedReview) return next(new AppError(`Review not found`, 404));
+  if (existedReview.user._id.toString() !== user.id.toString())
+    return next(new AppError(`You can only update your own reviews`, 401));
+  existedReview.review = review && review;
+  existedReview.rating = rating && rating;
 
-exports.deleteReview = factory.deleteOne(Review);
+  await existedReview.save();
+
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      data: existedReview,
+    },
+  });
+});
+
+exports.deleteReview = asyncHandler(async (req, res, next) => {
+  const {
+    params: { id },
+    user,
+  } = req;
+  const existedReview = await Review.findById(id).populate('user');
+  if (!existedReview) return next(new AppError(`Review not found`, 404));
+  if (existedReview.user._id.toString() !== user.id.toString())
+    return next(new AppError(`You can only delete your own reviews`, 401));
+
+  await existedReview.remove();
+
+  return res.status(200).json({
+    status: 'success',
+    message: 'deleted',
+  });
+});

@@ -28,16 +28,21 @@ router.param('id', (req, res, next, val) => {
 router.use('/tours/:id', reviewRoutes);
 
 router.route('/tours/tour-stats').get(getTourStats);
-router.route('/tours/monthly-plan/:year').get(getMonthlyPlan);
+router
+  .route('/tours/monthly-plan/:year')
+  .get(protect, authorize('admin', 'lead-guide', 'guide'), getMonthlyPlan);
 
 router.route('/tours/top-5-cheap').get(aliasTopTours, getAllTours);
 
-router.route('/tours').get(protect, getAllTours).post(createTour);
+router
+  .route('/tours')
+  .get(getAllTours)
+  .post(protect, authorize('admin', 'lead-guide'), createTour);
 
 router
   .route('/tours/:id')
   .get(getSingleTour)
-  .patch(updateTour)
+  .patch(protect, authorize('admin', 'lead-guide'), updateTour)
   .delete(protect, authorize('admin', 'lead-guide'), deleteTour);
 
 module.exports = router;
