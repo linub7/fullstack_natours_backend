@@ -113,6 +113,9 @@ const TourSchema = new Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+TourSchema.index({ price: 1, ratingsAverage: -1 });
+TourSchema.index({ slug: 1 });
+
 // arrow Fn does not get this keyword
 // keep in mind: we can not use virtuals in a query -> because virtuals is not part of the DB
 TourSchema.virtual('durationWeeks').get(function () {
