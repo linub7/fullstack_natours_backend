@@ -95,9 +95,10 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // 3) send it to user's email
-  const resetURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/auth/reset-password/${resetToken}`;
+  // const resetURL = `${req.protocol}://${req.get(
+  //   'host'
+  // )}/api/v1/auth/reset-password/${resetToken}`;
+  const resetURL = `${process.env.FRONTEND_URL}/auth/reset-password/${resetToken}`;
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to \n ${resetURL} \nIf you did'nt forget your password, please ignore this email`;
   const subject = 'Your Password Reset Token. Valid only for 10 minutes ⚠️.';
 
