@@ -20,7 +20,9 @@ const UserSchema = new Schema(
       validate: [validator.isEmail, 'Please enter a valid email'],
     },
     photo: {
-      type: String,
+      type: Object,
+      url: String,
+      public_id: String,
     },
     role: {
       type: String,

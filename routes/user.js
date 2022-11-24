@@ -6,6 +6,7 @@ const {
   forgotPassword,
   resetPassword,
   updatePassword,
+  signoutUser,
 } = require('../controllers/auth');
 const factory = require('../controllers/handlerFactory');
 const {
@@ -19,6 +20,7 @@ const {
 const { protect, getMe, authorize } = require('../middleware/auth');
 const User = require('../models/User');
 const AppError = require('../utils/AppError');
+const { uploadImage } = require('../middleware/multer');
 
 const router = express.Router();
 
@@ -35,11 +37,12 @@ router.patch('/auth/update-my-password', protect, updatePassword);
 
 router.post('/auth/signup', signup);
 router.post('/auth/signin', signin);
+router.get('/auth/signout', protect, signoutUser);
 
 router.route('/users').get(protect, authorize('admin'), getAllUsers);
 
 router.get('/me', protect, getMe, factory.getSingleOne(User));
-router.patch('/me/update', protect, updateMe);
+router.patch('/me/update', uploadImage.single('photo'), protect, updateMe);
 router.delete('/me/delete', protect, deleteMe);
 
 router

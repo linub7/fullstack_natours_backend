@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
@@ -11,6 +12,8 @@ const globalErrorHandler = require('./controllers/error');
 const errorHandler = require('./middleware/error');
 
 const app = express();
+
+app.use(cors({ origin: 'http://localhost:3000' }));
 
 // Set Security HTTP headers
 app.use(helmet());

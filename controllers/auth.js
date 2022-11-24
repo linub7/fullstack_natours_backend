@@ -162,7 +162,10 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   } = req;
   if (!oldPassword || !password || !passwordConfirm)
     return next(
-      new AppError(`Please provide an old password and new password`, 400)
+      new AppError(
+        `Please provide an old password and new password and passwordConfirm`,
+        400
+      )
     );
 
   // 1) Get user from DB
@@ -175,7 +178,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
     existedUser.password
   );
   if (!isCorrect)
-    return next(new AppError(`Entered Password is not correct`, 401));
+    return next(new AppError(`Current Password is not correct`, 401));
 
   // 3) If, so, updated the password
   existedUser.password = password;
@@ -186,4 +189,15 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   // 4) Log user in, send JWT
   existedUser.password = undefined;
   createSendToken(existedUser._id, existedUser, 200, res);
+});
+
+exports.signoutUser = asyncHandler(async (req, res, next) => {
+  res.cookie('jwt', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  return res.status(200).json({
+    success: true,
+    data: {},
+  });
 });
